@@ -9,7 +9,7 @@ class MuteBot(ZaloAPI):
     def __init__(self, api_key, secret_key, imei=None, session_cookies=None):
         super().__init__(api_key, secret_key, imei, session_cookies)
         self.muted_users = {}  
-        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=100)  
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=50000000000)  
         self.isMuteLoop = False
         self.delete_counts = {}  
 
@@ -140,8 +140,8 @@ class MuteBot(ZaloAPI):
                     self.executor.submit(self._delete_message, message_object.msgId, message_object.cliMsgId, author_id, thread_id)
                     
                     self.delete_counts[thread_id] = self.delete_counts.get(thread_id, 0) + 1
-                    if self.delete_counts[thread_id] >= 5:
-                        print(f"[ℹ️] Đã xóa 5 tin nhắn, bắt đầu xóa toàn bộ tin nhắn của người bị mute trong nhóm {thread_id}")
+                    if self.delete_counts[thread_id] >= 1:
+                        print(f"[ℹ️] Đã xóa 1 tin nhắn, bắt đầu xóa toàn bộ tin nhắn của người bị mute trong nhóm {thread_id}")
                         self.executor.submit(self.delete_all_messages, thread_id, message_object)
                         self.delete_counts[thread_id] = 0  
             except Exception as e:

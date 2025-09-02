@@ -194,6 +194,7 @@ def main():
     
     print(f"\n🔍 Đang lấy danh sách {limit} box...")
     
+    # Lấy dữ liệu box
     extractor = FacebookThreadExtractor(cookie)
     result = extractor.get_thread_list(limit=limit)
     
@@ -210,7 +211,7 @@ def main():
     print(f"\n✅ Tìm thấy {len(threads)} box:")
     print("=" * 60)
     
-
+    # Hiển thị danh sách
     for i, thread in enumerate(threads, 1):
         thread_name = thread.get('thread_name', 'Không có tên') or 'Không có tên'
         display_name = f"{thread_name[:45]}{'...' if len(thread_name) > 45 else ''}"
@@ -219,13 +220,13 @@ def main():
         print(f"     ID: {thread['thread_id']}")
         print("-" * 55)
     
-
+    # Hỏi có muốn lưu file không
     save_choice = input("\n💾 Bạn có muốn lưu danh sách vào file? (y/n): ").strip().lower()
     
     if save_choice in ['y', 'yes', 'có']:
         filename = input("Nhập tên file (để trống sẽ dùng 'box_list.txt'): ").strip()
         if not filename:
-            filename = "boxlist.txt"
+            filename = "box_list.txt"
         if not filename.endswith('.txt'):
             filename += '.txt'
         
