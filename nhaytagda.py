@@ -258,7 +258,7 @@ def send_message(cookie, idbox, content, list_tag, user_id, list_name_tag):
 
 def main():
     clear()
-    print(pyfiglet.figlet_format('NgCaoKien', font="slant"))
+    print(pyfiglet.figlet_format('NgQuangHuy', font="slant"))
     ck_list = []
     ten_ck = []
     id_acc = []
