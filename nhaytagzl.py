@@ -8,11 +8,13 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.box import DOUBLE
 from rich.table import Table
-from zlapi import *
-from zlapi.models import *
-
+from zlapi import ZaloAPI, ThreadType, Message, ZaloAPIException
+from zlapi.models import Message, Mention, MultiMention
 
 console = Console()
+
+def console_print(text, style="white"):
+    console.print(text, style=style)
 
 def create_main_banner():
     banner = Text(justify="center")
@@ -59,23 +61,20 @@ def create_instructions_panel():
     instructions.append("⚠️ Lưu ý: Đảm bảo file nhaychet.txt và cookie hợp lệ!\n", style="bold yellow")
     return Panel(instructions, title="Hướng Dẫn Sử Dụng", border_style="green", box=DOUBLE, width=50, padding=(0, 1))
 
-        
-
-import random
-
 def read_file_content(filename="nhaychet.txt"):
     try:
         with open(filename, "r", encoding="utf-8") as file:
             return [line.strip() for line in file if line.strip()]
     except Exception as e:
-        print(f"❌ Lỗi đọc file {filename}: {e}", style="bold red")
+        console_print(f"❌ Lỗi đọc file {filename}: {e}", style="bold red")
         return []
+
 def parse_selection(input_str, max_index):
     try:
         numbers = [int(i.strip()) for i in input_str.split(',')]
         return [n for n in numbers if 1 <= n <= max_index]
     except:
-        print("❌ Định dạng không hợp lệ!", style="bold red")
+        console_print("❌ Định dạng không hợp lệ!", style="bold red")
         return []
 
 class Bot(ZaloAPI):
@@ -89,7 +88,7 @@ class Bot(ZaloAPI):
 
     def start_spam(self, thread_id, thread_type, tagged_users):
         if not self.message_lines:
-            print("❌ File nhaychet.txt rỗng hoặc không đọc được!", style="bold red")
+            console_print("❌ File nhaychet.txt rỗng hoặc không đọc được!", style="bold red")
             return
         if thread_id not in self.running_flags:
             self.running_flags[thread_id] = multiprocessing.Value('b', False)
@@ -98,8 +97,7 @@ class Bot(ZaloAPI):
         if thread_id not in self.tagged_users:
             self.tagged_users[thread_id] = tagged_users
         if not self.running_flags[thread_id].value:
-            self.send(Message(text="""
-"""), thread_id, thread_type, ttl=60000)
+            self.send(Message(text="🚀 Bắt đầu nhây tag!"), thread_id, thread_type, ttl=60000)
             self.running_flags[thread_id].value = True
             self.processes[thread_id] = multiprocessing.Process(
                 target=self.spam_messages_with_tag,
@@ -113,7 +111,7 @@ class Bot(ZaloAPI):
             if not self.message_lines:
                 self.message_lines = read_file_content()
                 if not self.message_lines:
-                    print("❌ File nhaychet.txt rỗng!", style="bold red")
+                    console_print("❌ File nhaychet.txt rỗng!", style="bold red")
                     running_flag.value = False
                     break
             raw_msg = self.message_lines[content_index]
@@ -125,18 +123,18 @@ class Bot(ZaloAPI):
                 try:
                     user_info = self.fetchUserInfo(user_id)
                     if not user_info or user_id not in user_info.changed_profiles:
-                        print(f"[⚠️] Thành viên {user_id} không còn trong nhóm, loại bỏ!", style="bold yellow")
+                        console_print(f"[⚠️] Thành viên {user_id} không còn trong nhóm, loại bỏ!", style="bold yellow")
                         continue
                     user_name = user_info.changed_profiles[user_id]['displayName']
                     msg += "@Member "
                     mention_names.append(user_name)
                     valid_users.append(user_id)
                 except Exception as e:
-                    print(f"[⚠️] Lỗi khi lấy thông tin user {user_id}: {e}", style="bold yellow")
+                    console_print(f"[⚠️] Lỗi khi lấy thông tin user {user_id}: {e}", style="bold yellow")
                     continue
             self.tagged_users[thread_id] = valid_users
             if not self.tagged_users[thread_id]:
-                print("[🛑] Không còn thành viên để tag, dừng bot!", style="bold red")
+                console_print("[🛑] Không còn thành viên để tag, dừng bot!", style="bold red")
                 running_flag.value = False
                 break
             final_msg = msg
@@ -150,9 +148,9 @@ class Bot(ZaloAPI):
                 time.sleep(4)
                 message_to_send = Message(text=final_msg.strip(), mention=MultiMention(mentions))
                 self.send(message_to_send, thread_id=thread_id, thread_type=thread_type)
-                print(f"[✅] Đã gửi tin nhắn tới nhóm {thread_id}: {final_msg[:30]}...", style="bold green")
+                console_print(f"[✅] Đã gửi tin nhắn tới nhóm {thread_id}: {final_msg[:30]}...", style="bold green")
             except Exception as e:
-                print(f"[❌] Lỗi gửi tin nhắn: {e}", style="bold red")
+                console_print(f"[❌] Lỗi gửi tin nhắn: {e}", style="bold red")
                 time.sleep(3)
                 continue
             content_index = (content_index + 1) % len(self.message_lines)
@@ -180,30 +178,30 @@ class Bot(ZaloAPI):
                 })
             return type('GroupObj', (), {'groups': [type('GroupItem', (), {'grid': g['id'], 'name': g['name']})() for g in group_list]})()
         except AttributeError as e:
-            print(f"❌ Lỗi: Phương thức hoặc thuộc tính không tồn tại: {e}", style="bold red")
+            console_print(f"❌ Lỗi: Phương thức hoặc thuộc tính không tồn tại: {e}", style="bold red")
             return None
         except ZaloAPIException as e:
-            print(f"❌ Lỗi API Zalo: {e}", style="bold red")
+            console_print(f"❌ Lỗi API Zalo: {e}", style="bold red")
             return None
         except Exception as e:
-            print(f"❌ Lỗi không xác định khi lấy danh sách nhóm: {e}", style="bold red")
+            console_print(f"❌ Lỗi không xác định khi lấy danh sách nhóm: {e}", style="bold red")
             return None
 
     def fetchGroupInfo(self, group_id):
         try:
             return super().fetchGroupInfo(group_id)
         except ZaloAPIException as e:
-            print(f"❌ Lỗi API Zalo khi lấy thông tin nhóm {group_id}: {e}", style="bold red")
+            console_print(f"❌ Lỗi API Zalo khi lấy thông tin nhóm {group_id}: {e}", style="bold red")
             return None
         except Exception as e:
-            print(f"❌ Lỗi khi lấy thông tin nhóm {group_id}: {e}", style="bold red")
+            console_print(f"❌ Lỗi khi lấy thông tin nhóm {group_id}: {e}", style="bold red")
             return None
 
     def fetchGroupMembers(self, group_id):
         try:
             group_info = self.fetchGroupInfo(group_id)
             if not group_info or not hasattr(group_info, 'gridInfoMap') or group_id not in group_info.gridInfoMap:
-                print(f"❌ Không lấy được thông tin nhóm {group_id}", style="bold red")
+                console_print(f"❌ Không lấy được thông tin nhóm {group_id}", style="bold red")
                 return []
             mem_ver_list = group_info.gridInfoMap[group_id]["memVerList"]
             member_ids = [mem.split("_")[0] for mem in mem_ver_list]
@@ -217,20 +215,20 @@ class Bot(ZaloAPI):
                         'name': user_data['displayName']
                     })
                 except Exception as e:
-                    print(f"⚠️ Lỗi khi lấy thông tin user {user_id}: {e}", style="bold yellow")
+                    console_print(f"⚠️ Lỗi khi lấy thông tin user {user_id}: {e}", style="bold yellow")
                     members.append({
                         'id': user_id,
                         'name': f"[Lỗi: {user_id}]"
                     })
             return members
         except Exception as e:
-            print(f"❌ Lỗi khi lấy danh sách thành viên: {e}", style="bold red")
+            console_print(f"❌ Lỗi khi lấy danh sách thành viên: {e}", style="bold red")
             return []
 
 def start_bot(api_key, secret_key, imei, session_cookies, delay, group_ids, tagged_users):
     bot = Bot(api_key, secret_key, imei, session_cookies, delay)
     for group_id in group_ids:
-        print(f"▶️ Bắt đầu nhây tag nhóm {group_id}", style="bold cyan")
+        console_print(f"▶️ Bắt đầu nhây tag nhóm {group_id}", style="bold cyan")
         bot.start_spam(group_id, ThreadType.GROUP, tagged_users.get(group_id, []))
     bot.listen(run_forever=True, thread=False, delay=1, type='requests')
 
@@ -241,7 +239,7 @@ def start_multiple_accounts():
     try:
         num_accounts = int(Prompt.ask("💠 Nhập số lượng tài khoản Zalo muốn chạy", default="1"))
     except ValueError:
-        print("❌ Nhập sai, phải là số nguyên!", style="bold red")
+        console_print("❌ Nhập sai, phải là số nguyên!", style="bold red")
         return
     processes = []
     for i in range(num_accounts):
@@ -252,16 +250,16 @@ def start_multiple_accounts():
             try:
                 session_cookies = eval(cookie_str)
                 if not isinstance(session_cookies, dict):
-                    print("❌ Cookie phải là dictionary!", style="bold red")
+                    console_print("❌ Cookie phải là dictionary!", style="bold red")
                     continue
             except:
-                print("❌ Cookie không hợp lệ, dùng dạng {'key': 'value'}!", style="bold red")
+                console_print("❌ Cookie không hợp lệ, dùng dạng {'key': 'value'}!", style="bold red")
                 continue
             delay = int(Prompt.ask("⏳ Nhập delay giữa các lần gửi (giây)", default="5"))
             bot = Bot('api_key', 'secret_key', imei, session_cookies, delay)
             groups = bot.fetch_groups()
             if not groups or not hasattr(groups, 'groups') or not groups.groups:
-                print("⚠️ Không lấy được nhóm nào!", style="bold red")
+                console_print("⚠️ Không lấy được nhóm nào!", style="bold red")
                 continue
             table = Table(show_header=True, header_style="bold cyan", show_lines=False, box=None)
             table.add_column("STT", width=5, justify="center", style="white")
@@ -273,14 +271,14 @@ def start_multiple_accounts():
             raw = Prompt.ask("🔸 Nhập số nhóm muốn nhây tag (VD: 1,3)", default="")
             selected = parse_selection(raw, len(groups.groups))
             if not selected:
-                print("⚠️ Không chọn nhóm nào!", style="bold red")
+                console_print("⚠️ Không chọn nhóm nào!", style="bold red")
                 continue
             selected_ids = [groups.groups[i - 1].grid for i in selected]
             tagged_users = {}
             for group_id in selected_ids:
                 members = bot.fetchGroupMembers(group_id)
                 if not members:
-                    print(f"⚠️ Nhóm {group_id} không có thành viên!", style="bold red")
+                    console_print(f"⚠️ Nhóm {group_id} không có thành viên!", style="bold red")
                     continue
                 table = Table(show_header=True, header_style="bold cyan", show_lines=False, box=None)
                 table.add_column("STT", width=5, justify="center", style="white")
@@ -301,12 +299,12 @@ def start_multiple_accounts():
             processes.append(p)
             p.start()
         except ValueError:
-            print("❌ Delay phải là số nguyên!", style="bold red")
+            console_print("❌ Delay phải là số nguyên!", style="bold red")
             continue
         except Exception as e:
-            print(f"❌ Lỗi nhập liệu: {e}", style="bold red")
+            console_print(f"❌ Lỗi nhập liệu: {e}", style="bold red")
             continue
-    print("\n✅ TẤT CẢ BOT ĐÃ KHỞI ĐỘNG THÀNH CÔNG", style="bold green")
+    console_print("\n✅ TẤT CẢ BOT ĐÃ KHỞI ĐỘNG THÀNH CÔNG", style="bold green")
 
 if __name__ == "__main__":
     start_multiple_accounts()
