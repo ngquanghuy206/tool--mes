@@ -17,20 +17,6 @@ def create_main_banner():
 ██╔══██║██╔══╝░░░╚═══██╗██╔══██║
 ██║░░██║███████╗██████╔╝██║░░██║
 ╚═╝░░╚═╝╚══════╝╚═════╝░╚═╝░░╚═╝
-\n🌟 TOOL ZALO TREO NGÔN BY NG QUANG HUY 🌟
-👑 Admin: Ng Quang Huy
-📱 Thông tin liên hệ:
-   • Facebook: facebook.com/profile.php?id=61574588173706
-   • Zalo: 0904562214
-   • Nhóm Zalo: https://zalo.me/g/fkrvry389
-ℹ️ Phiên bản: v10.7
-📲 Copyright: Anh Em Super Hot x Anh Em Hot Messenger
-⏰ Thời gian: {}
-🔄 Cập nhật lần cuối: 15/06/2025
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Dịch vụ hot war chỉ từ 50k, ib ngay nhé!
-🚀 Chúc bạn sử dụng tool vui vẻ!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """.format(time.strftime('%I:%M %p, %d/%m/%Y'))
     return banner
 
@@ -100,7 +86,7 @@ class Bot(ZaloAPI):
 
     def start_spam(self, thread_id, thread_type, ttl=None):
         if not self.message_text and self.media_type == "text":
-            custom_print("Nội dung spam rỗng!")
+            custom_print("Nội dung ngôn rỗng!")
             return
         if thread_id not in self.running_flags:
             self.running_flags[thread_id] = multiprocessing.Value('b', False)
@@ -145,7 +131,7 @@ class Bot(ZaloAPI):
                         selected_index = random.randint(0, len(video_urls) - 1)
                     self.last_selected_index = selected_index
                     selected_url = video_urls[selected_index]
-                    thumbnail_url = "https://i.imgur.com/yeZXTO7.jpeg"
+                    thumbnail_url = "https://files.catbox.moe/bvw84b.jpg"
                     duration = "100000"
                     self.sendRemoteVideo(
                         selected_url,
@@ -172,7 +158,7 @@ class Bot(ZaloAPI):
                                 offset=0,
                                 length=1000,
                                 style="font",
-                                size="30",
+                                size="35",
                                 auto_format=False
                             ),
                         ]
