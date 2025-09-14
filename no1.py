@@ -48,7 +48,7 @@ def create_instructions():
    • 2: Cam
    • 3: Vàng
    • 4: Xanh lá
-   • 5: Xanh dương
+   • 5: Trắng
 8️⃣ Chọn chế độ treo: ảnh (Y), video (N), hoặc chỉ tin nhắn (O).
    • Nếu chọn Y, nhập thư mục chứa ảnh.
    • Nếu chọn N, nhập file .txt chứa danh sách URL video.
@@ -107,7 +107,7 @@ class Bot(ZaloAPI):
             2: "#f27806",  # Cam
             3: "#f7b503",  # Vàng
             4: "#15a85f",  # Xanh lá
-            5: None        # Xanh dương (không màu)
+            5: "#ffffff",  # Trắng
         }
 
     def start_spam(self, thread_id, thread_type, ttl=None):
@@ -158,7 +158,7 @@ class Bot(ZaloAPI):
                         selected_index = random.randint(0, len(video_urls) - 1)
                     self.last_selected_index = selected_index
                     selected_url = video_urls[selected_index]
-                    thumbnail_url = "https://files.catbox.moe/oq8soo.jpeg"
+                    thumbnail_url = "https://files.catbox.moe/t4ghre.png"
                     duration = "100000"
                     self.sendRemoteVideo(
                         selected_url,
