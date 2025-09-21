@@ -1,7 +1,7 @@
 import multiprocessing
 import time
 import random
-from zlapi import ZaloAPI, ZaloAPIException, Message, ThreadType
+from zlapi import ZaloAPI, ZaloAPIException, Message, ThreadType, Mention, MultiMention
 
 def in_thong_bao(noi_dung):
     print(noi_dung)
@@ -14,14 +14,6 @@ def doc_file_noi_dung(ten_file):
         in_thong_bao(f"Lỗi đọc file {ten_file}: {e}")
         return []
 
-def phan_tich_lua_chon(chuoi_nhap, so_luong_toi_da):
-    try:
-        cac_so = [int(i.strip()) for i in chuoi_nhap.split(',')]
-        return [n for n in cac_so if 1 <= n <= so_luong_toi_da]
-    except:
-        in_thong_bao("Định dạng nhập sai!")
-        return []
-
 def doc_danh_sach_ten(ten_file_ten):
     try:
         with open(ten_file_ten, "r", encoding="utf-8") as file:
@@ -30,57 +22,106 @@ def doc_danh_sach_ten(ten_file_ten):
         in_thong_bao(f"Lỗi đọc file tên {ten_file_ten}: {e}")
         return []
 
+def phan_tich_lua_chon(chuoi_nhap, so_luong_toi_da):
+    try:
+        cac_so = [int(i.strip()) for i in chuoi_nhap.split(',')]
+        return [n for n in cac_so if 1 <= n <= so_luong_toi_da]
+    except:
+        in_thong_bao("Định dạng nhập sai!")
+        return []
+
 class Bot(ZaloAPI):
-    def __init__(self, imei, session_cookies, delay_min, delay_max):
+    def __init__(self, imei, session_cookies, delay_min, delay_max, ttl=None):
         super().__init__('api_key', 'secret_key', imei, session_cookies)
         self.delay_min = delay_min
         self.delay_max = delay_max if delay_max is not None else delay_min
-        self.cac_dong_tin_nhan = doc_file_noi_dung("nhayhoa.txt")
+        self.ttl = ttl
+        self.cac_dong_tin_nhan = []
         self.cac_co_chay = {}
         self.cac_tien_trinh = {}
+        self.cac_nguoi_duoc_tag = {}
 
-    def bat_dau_gui_tin(self, id_nhom, loai_nhom):
+    def bat_dau_nhay_tag(self, id_nhom, loai_nhom, nguoi_duoc_tag, ten_file_noi_dung, ten_file_ten):
+        self.cac_dong_tin_nhan = doc_file_noi_dung(ten_file_noi_dung)
         if not self.cac_dong_tin_nhan:
-            in_thong_bao("File nhaychet.txt rỗng hoặc không đọc được!")
+            in_thong_bao(f"File {ten_file_noi_dung} rỗng hoặc không đọc được!")
             return
         if id_nhom not in self.cac_co_chay:
             self.cac_co_chay[id_nhom] = multiprocessing.Value('b', False)
         if id_nhom not in self.cac_tien_trinh:
             self.cac_tien_trinh[id_nhom] = None
+        if id_nhom not in self.cac_nguoi_duoc_tag:
+            self.cac_nguoi_duoc_tag[id_nhom] = nguoi_duoc_tag
         if not self.cac_co_chay[id_nhom].value:
-            self.send(Message(text=""), id_nhom, loai_nhom, ttl=60000)
+            self.send(Message(text=""), id_nhom, loai_nhom, ttl=self.ttl if self.ttl is not None else 60000)
             self.cac_co_chay[id_nhom].value = True
             self.cac_tien_trinh[id_nhom] = multiprocessing.Process(
-                target=self.gui_tin_nhan_thuong,
-                args=(id_nhom, loai_nhom, self.cac_co_chay[id_nhom])
+                target=self.gui_tin_nhan_tag,
+                args=(id_nhom, loai_nhom, self.cac_co_chay[id_nhom], ten_file_noi_dung, ten_file_ten)
             )
             self.cac_tien_trinh[id_nhom].start()
 
-    def gui_tin_nhan_thuong(self, id_nhom, loai_nhom, co_chay):
-        danh_sach_ten = doc_danh_sach_ten("ten_nguoi.txt")
+    def gui_tin_nhan_tag(self, id_nhom, loai_nhom, co_chay, ten_file_noi_dung, ten_file_ten):
+        danh_sach_ten = doc_danh_sach_ten(ten_file_ten)
         if not danh_sach_ten:
-            in_thong_bao("Danh sách tên rỗng, chỉ gửi nội dung gốc!")
-    
+            in_thong_bao("Danh sách tên rỗng, chỉ gửi nội dung và tag!")
+        chi_so_noi_dung = 0
         while co_chay.value:
             if not self.cac_dong_tin_nhan:
-                self.cac_dong_tin_nhan = doc_file_noi_dung("nhayhoa.txt")
+                self.cac_dong_tin_nhan = doc_file_noi_dung(ten_file_noi_dung)
                 if not self.cac_dong_tin_nhan:
-                    in_thong_bao("File nhayhoa.txt rỗng!")
+                    in_thong_bao(f"File {ten_file_noi_dung} rỗng!")
                     co_chay.value = False
                     break
-            tin_nhan = random.choice(self.cac_dong_tin_nhan)
-            if danh_sach_ten:
-                ten = random.choice(danh_sach_ten)
-                tin_nhan = f"{ten} {tin_nhan}"
+            tin_nhan_goc = self.cac_dong_tin_nhan[chi_so_noi_dung]
+            danh_sach_tag = []
+            nguoi_hop_le = []
+            ten_nguoi_tag = []
+            for id_nguoi in self.cac_nguoi_duoc_tag[id_nhom]:
+                try:
+                    thong_tin_nguoi = self.fetchUserInfo(id_nguoi)
+                    if not thong_tin_nguoi or id_nguoi not in thong_tin_nguoi.changed_profiles:
+                        in_thong_bao(f"Thành viên {id_nguoi} không còn trong nhóm, bỏ qua!")
+                        continue
+                    ten_nguoi = thong_tin_nguoi.changed_profiles[id_nguoi]['displayName']
+                    ten_nguoi_tag.append(ten_nguoi)
+                    nguoi_hop_le.append(id_nguoi)
+                except Exception as e:
+                    in_thong_bao(f"Lỗi lấy thông tin người {id_nguoi}: {e}")
+                    continue
+            self.cac_nguoi_duoc_tag[id_nhom] = nguoi_hop_le
+            if not self.cac_nguoi_duoc_tag[id_nhom] and not danh_sach_ten:
+                in_thong_bao("Hết người để tag và không có tên trong file, dừng bot!")
+                co_chay.value = False
+                break
+            ten_chui = random.choice(danh_sach_ten) if danh_sach_ten else ""
+            tin_nhan = ""
+            if random.choice([True, False]):
+                tin_nhan = f"{tin_nhan_goc} {ten_chui} " if ten_chui else f"{tin_nhan_goc} "
+                for ten_nguoi in ten_nguoi_tag:
+                    tin_nhan += f"@{ten_nguoi} "
+            else:
+                for ten_nguoi in ten_nguoi_tag:
+                    tin_nhan += f"@{ten_nguoi} "
+                tin_nhan += f"{tin_nhan_goc} {ten_chui}" if ten_chui else f"{tin_nhan_goc}"
+            danh_sach_tag = []
+            for i, ten_nguoi in enumerate(ten_nguoi_tag):
+                vi_tri = tin_nhan.find(f"@{ten_nguoi}")
+                danh_sach_tag.append(Mention(nguoi_hop_le[i], length=len(f"@{ten_nguoi}"), offset=vi_tri, auto_format=False))
             try:
                 self.setTyping(id_nhom, loai_nhom)
-                time.sleep(1)
-                self.send(Message(text=tin_nhan), id_nhom, loai_nhom)
-                in_thong_bao(f"Chửi tag tới nhóm {id_nhom}: {tin_nhan[:30]}...")
+                time.sleep(2)
+                tin_nhan_gui = Message(text=tin_nhan.strip(), mention=MultiMention(danh_sach_tag) if danh_sach_tag else None)
+                if self.ttl is not None:
+                    self.send(tin_nhan_gui, thread_id=id_nhom, thread_type=loai_nhom, ttl=self.ttl)
+                else:
+                    self.send(tin_nhan_gui, thread_id=id_nhom, thread_type=loai_nhom)
+                in_thong_bao(f"Nhây tag tới nhóm {id_nhom}: {tin_nhan[:30]}...")
             except Exception as e:
                 in_thong_bao(f"Lỗi gửi tin nhắn: {e}")
                 time.sleep(3)
                 continue
+            chi_so_noi_dung = (chi_so_noi_dung + 1) % len(self.cac_dong_tin_nhan)
             delay = random.uniform(self.delay_min, self.delay_max)
             in_thong_bao(f"Đợi {delay:.2f} giây")
             time.sleep(delay)
@@ -110,30 +151,69 @@ class Bot(ZaloAPI):
             in_thong_bao(f"Lỗi lấy danh sách nhóm: {e}")
             return None
 
-def khoi_dong_bot_nhaybox(imei, session_cookies, delay_min, delay_max, id_nhom):
-    bot = Bot(imei, session_cookies, delay_min, delay_max)
+    def lay_thong_tin_nhom(self, id_nhom):
+        try:
+            return self.fetchGroupInfo(id_nhom)
+        except ZaloAPIException as e:
+            in_thong_bao(f"Lỗi API Zalo khi lấy thông tin nhóm {id_nhom}: {e}")
+            return None
+        except Exception as e:
+            in_thong_bao(f"Lỗi khi lấy thông tin nhóm {id_nhom}: {e}")
+            return None
+
+    def lay_thanh_vien_nhom(self, id_nhom):
+        try:
+            thong_tin_nhom = self.lay_thong_tin_nhom(id_nhom)
+            if not thong_tin_nhom or not hasattr(thong_tin_nhom, 'gridInfoMap') or id_nhom not in thong_tin_nhom.gridInfoMap:
+                in_thong_bao(f"Không lấy được thông tin nhóm {id_nhom}")
+                return []
+            danh_sach_thanh_vien = thong_tin_nhom.gridInfoMap[id_nhom]["memVerList"]
+            id_thanh_vien = [mem.split("_")[0] for mem in danh_sach_thanh_vien]
+            thanh_vien = []
+            for id_nguoi in id_thanh_vien:
+                try:
+                    thong_tin_nguoi = self.fetchUserInfo(id_nguoi)
+                    du_lieu_nguoi = thong_tin_nguoi.changed_profiles[id_nguoi]
+                    thanh_vien.append({
+                        'id': du_lieu_nguoi['userId'],
+                        'ten': du_lieu_nguoi['displayName']
+                    })
+                except Exception as e:
+                    in_thong_bao(f"Lỗi lấy thông tin người {id_nguoi}: {e}")
+                    thanh_vien.append({
+                        'id': id_nguoi,
+                        'ten': f"[Lỗi: {id_nguoi}]"
+                    })
+            return thanh_vien
+        except Exception as e:
+            in_thong_bao(f"Lỗi lấy danh sách thành viên: {e}")
+            return []
+
+def khoi_dong_bot(imei, session_cookies, delay_min, delay_max, id_nhom, nguoi_duoc_tag, ttl, ten_file_noi_dung, ten_file_ten):
+    bot = Bot(imei, session_cookies, delay_min, delay_max, ttl)
     for nhom in id_nhom:
-        in_thong_bao(f"Bắt đầu nhây nhóm {nhom}")
-        bot.bat_dau_gui_tin(nhom, ThreadType.GROUP)
+        in_thong_bao(f"Bắt đầu nhây tag nhóm {nhom}")
+        bot.bat_dau_nhay_tag(nhom, ThreadType.GROUP, nguoi_duoc_tag.get(nhom, []), ten_file_noi_dung, ten_file_ten)
     bot.listen(run_forever=True, thread=False, delay=1, type='requests')
 
 def khoi_dong_nhieu_tai_khoan():
     while True:
-        print("Tool Nhây Box V10.8")
+        print("Tool Nhây Tag V8.0")
         print("Hướng dẫn sử dụng:")
         print("1. Nhập số lượng tài khoản Zalo muốn chạy.")
         print("2. Nhập IMEI, Cookie cho từng tài khoản.")
-        print("3. Nhập tên file chứa danh sách tên người bị chửi.")
-        print("4. Chọn nhóm để gửi tin nhắn.")
-        print("5. Chọn delay cố định hoặc random (Y/N).")
-        print("6. Nếu random, nhập khoảng delay min và max.")
-        print("Lưu ý: Phải dz như dzi và gay như nanh")
-        
+        print("3. Nhập tên file chứa nội dung và danh sách tên người bị chửi.")
+        print("4. Chọn nhóm để nhây tag (VD: 1,3).")
+        print("5. Chọn thành viên để tag (VD: 1,2,3 hoặc 0 để không tag).")
+        print("6. Chọn delay cố định hoặc random (Y/N).")
+        print("7. Nếu random, nhập khoảng delay min và max.")
+        print("Lưu ý: Đảm bảo file nội dung và tên hợp lệ!")
         try:
             so_tai_khoan = int(input("Nhập số tài khoản Zalo muốn chạy [1]: ") or "1")
         except ValueError:
             in_thong_bao("Nhập sai, phải là số nguyên!")
             continue
+        ten_file_noi_dung = input("Nhập tên file chứa nội dung (VD: nhayhoa.txt): ") or "nhayhoa.txt"
         ten_file_ten = input("Nhập tên file chứa danh sách tên (VD: ten_nguoi.txt): ") or "ten_nguoi.txt"
         cac_tien_trinh = []
         for i in range(so_tai_khoan):
@@ -149,7 +229,24 @@ def khoi_dong_nhieu_tai_khoan():
                 except:
                     in_thong_bao("Cookie sai định dạng, dùng dạng {'key': 'value'}!")
                     continue
-                bot = Bot(imei, session_cookies, 0, None)
+                ttl = None
+                while True:
+                    ttl_choice = input("Bật thời gian tự hủy tin nhắn (TTL)? (Y/N) [N]: ").lower() or 'n'
+                    if ttl_choice in ['y', 'n']:
+                        break
+                    in_thong_bao("Vui lòng nhập Y hoặc N!")
+                if ttl_choice == 'y':
+                    while True:
+                        try:
+                            ttl_seconds = float(input("Nhập thời gian tự hủy (giây): "))
+                            if ttl_seconds <= 0:
+                                in_thong_bao("Thời gian TTL phải lớn hơn 0!")
+                                continue
+                            ttl = int(ttl_seconds * 1000)
+                            break
+                        except ValueError:
+                            in_thong_bao("Thời gian TTL phải là số!")
+                bot = Bot(imei, session_cookies, 0, None, ttl)
                 delay_type = input("Delay cố định hay random? (Y/N) [N]: ").lower() or 'n'
                 if delay_type == 'y':
                     while True:
@@ -188,15 +285,30 @@ def khoi_dong_nhieu_tai_khoan():
                 print("\nDanh sách nhóm:")
                 for idx, nhom_item in enumerate(nhom.nhom, 1):
                     print(f"{idx}. {nhom_item.ten} (ID: {nhom_item.grid})")
-                lua_chon = input("Nhập số thứ tự nhóm để nhây (VD: 1,3): ")
+                lua_chon = input("Nhập số thứ tự nhóm để nhây tag (VD: 1,3): ")
                 nhom_chon = phan_tich_lua_chon(lua_chon, len(nhom.nhom))
                 if not nhom_chon:
                     in_thong_bao("Không chọn nhóm nào!")
                     continue
                 id_nhom_chon = [nhom.nhom[i - 1].grid for i in nhom_chon]
+                nguoi_duoc_tag = {}
+                for id_nhom in id_nhom_chon:
+                    thanh_vien = bot.lay_thanh_vien_nhom(id_nhom)
+                    if not thanh_vien:
+                        in_thong_bao(f"Nhóm {id_nhom} không có thành viên!")
+                        continue
+                    print(f"\nThành viên nhóm {id_nhom}:")
+                    for idx, tv in enumerate(thanh_vien, 1):
+                        print(f"{idx}. {tv['ten']} (ID: {tv['id']})")
+                    lua_chon_tv = input("Nhập số thứ tự thành viên để tag (VD: 1,2,3, 0 để không tag): ")
+                    if lua_chon_tv.strip() == "0":
+                        nguoi_duoc_tag[id_nhom] = []
+                    else:
+                        thanh_vien_chon = phan_tich_lua_chon(lua_chon_tv, len(thanh_vien))
+                        nguoi_duoc_tag[id_nhom] = [thanh_vien[i - 1]['id'] for i in thanh_vien_chon]
                 tien_trinh = multiprocessing.Process(
-                    target=khoi_dong_bot_nhaybox,
-                    args=(imei, session_cookies, delay_min, delay_max, id_nhom_chon)
+                    target=khoi_dong_bot,
+                    args=(imei, session_cookies, delay_min, delay_max, id_nhom_chon, nguoi_duoc_tag, ttl, ten_file_noi_dung, ten_file_ten)
                 )
                 cac_tien_trinh.append(tien_trinh)
                 tien_trinh.start()
