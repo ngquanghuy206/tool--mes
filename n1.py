@@ -118,7 +118,7 @@ def window1():
     D = f"Mozilla/5.0 (Windows NT {random.choice(['10.0', '11.0'])}; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.{latest_build}.{latest_patch} Safari/537.36"
     return random.choice([A, B, C, D])
 
-sys.stdout.write('\x1b]2;𓆩【A H B 】𓆪 \x07')
+sys.stdout.write('\x1b]2;𓆩【DZI X TOOL 】𓆪 \x07')
 
 def ____banner____():
     os.system('cls' if os.name == 'nt' else 'clear')
